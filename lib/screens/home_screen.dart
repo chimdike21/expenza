@@ -1,9 +1,17 @@
+import 'package:expenza/models/expense.dart';
 import 'package:expenza/widgets/expense_form.dart';
 import 'package:flutter/material.dart';
+import 'package:expenza/screens/expense_list.dart';
 
-
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final List<Expense> _expenses = [];
 
   @override
   Widget build(BuildContext context) {
@@ -39,14 +47,28 @@ class HomeScreen extends StatelessWidget {
         children: [
           const Align(
             alignment: Alignment(0, -0.4),
-            child: Text(
-              'Welcome to expenza!',
-              style: TextStyle(
-                fontSize: 35,
-                color: Colors.green, // money-green text
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Nunito',
-              ),
+            child: Column(
+              children: [
+                Text(
+                  'Welcome to expenza!',
+                  style: TextStyle(
+                    fontSize: 35,
+                    color: Colors.green, // money-green text
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Nunito',
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Track your expenses, control your future.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87, // light grey text
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Nunito',
+                  ),
+                ),
+              ],
             ),
           ),
           Column(
@@ -55,10 +77,13 @@ class HomeScreen extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (ctx) =>
-                        const Center(child: Text('Track Expenses')),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ExpenseList(
+                        expenses: _expenses,
+                      ), // Replace with real list later
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -87,8 +112,14 @@ class HomeScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          ExpenseForm(),
+                      builder: (context) => ExpenseForm(
+                        onSubmit: (expense) {
+                          setState(() {
+                            _expenses.add(expense);
+                          });
+                         Navigator.pop(context);
+                        },
+                      ),
                     ),
                   );
                 },

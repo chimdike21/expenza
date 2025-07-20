@@ -1,22 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../models/expense.dart';
 
 class ExpenseForm extends StatefulWidget {
-  const ExpenseForm({super.key});
+  final void Function(Expense expense) onSubmit;
+
+  const ExpenseForm({super.key, required this.onSubmit});
 
   @override
   _ExpenseFormState createState() => _ExpenseFormState();
 }
 
 class _ExpenseFormState extends State<ExpenseForm> {
+  final titleController = TextEditingController();
+  final amountController = TextEditingController();
+
   String? selectedCategory;
   DateTime? selectedDate;
 
   void _presentDatepicker() async {
     final now = DateTime.now();
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: DateTime(now.year - 1),
+      lastDate: DateTime(now.year + 1),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        selectedDate = pickedDate;
+      });
+    }
   }
 
   @override
+  void dispose() {
+    titleController.dispose();
+    amountController.dispose();
+    super.dispose();
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Add New Expense')),
@@ -36,16 +60,18 @@ class _ExpenseFormState extends State<ExpenseForm> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(
                 labelText: 'Title',
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),
-            const TextField(
+            TextField(
+              controller: amountController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Amount',
                 border: OutlineInputBorder(),
               ),
@@ -68,6 +94,112 @@ class _ExpenseFormState extends State<ExpenseForm> {
                 });
               },
               value: selectedCategory,
+            ),
+
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    selectedDate == null
+                        ? 'No Date Chosen'
+                        : 'Picked Date: ${DateFormat.yMMMd().format(selectedDate!)}',
+                  ),
+                ),
+                TextButton(
+                  onPressed: _presentDatepicker,
+                  child: const Text('Choose Date'),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: ElevatedButton(
+                onPressed: () {
+                  //logic
+                  final enteredTitle = titleController.text.trim();
+                  final enteredAmount = double.tryParse(
+                    amountController.text.trim().replaceAll(',', ''),
+                  );
+
+                  if (enteredTitle.isEmpty ||
+                      enteredAmount == null ||
+                      enteredAmount <= 0 ||
+                      selectedCategory == null ||
+                      selectedDate == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please fill all fields correctly!'),
+                      ),
+                    );
+                    return;
+                  }
+
+                  //temporary output
+                  print('Title: $enteredTitle');
+                  print('Amount: $enteredAmount');
+                  print('Category: $selectedCategory');
+                  print('Date: ${DateFormat.yMMMd().format(selectedDate!)}');
+
+                  widget.onSubmit(
+                    Expense(
+                      title: enteredTitle,
+                      amount: enteredAmount,
+                      category: selectedCategory!,
+                      date: selectedDate!,
+                    ),
+                  );
+                 
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.check_circle, color: Colors.green, size: 60),
+                            SizedBox(height: 12),
+                            Text(
+                              'Expense added!',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Nunito',
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+
+                  // Delay and then pop the form after showing dialog
+                  Future.delayed(const Duration(seconds: 1), () {
+                    if (Navigator.canPop(context)) {
+                      Navigator.of(context).pop(); // close dialog
+                    }
+                    if (Navigator.canPop(context)) {
+                      Navigator.of(context).pop(); // close form
+                    }
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green, // money-green button
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
+                child: const Text(
+                  'Add Expense',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
             ),
           ],
         ),
