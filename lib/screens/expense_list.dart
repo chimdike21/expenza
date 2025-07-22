@@ -5,8 +5,13 @@ import '../models/expense.dart';
 
 class ExpenseList extends StatelessWidget {
   final List<Expense> expenses;
+  final void Function(Expense) onDelete;
 
-  const ExpenseList({super.key, required this.expenses});
+  const ExpenseList({
+    super.key, 
+    required this.expenses, 
+    required this.onDelete
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +33,22 @@ class ExpenseList extends StatelessWidget {
               itemCount: expenses.length,
               itemBuilder: (ctx, index) {
                 final exp = expenses[index];
-                return ExpenseItem(expense: exp);
+                return Dismissible(
+                  key:ValueKey(exp.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                      size: 36,
+                    ),
+                  ), 
+                  onDismissed: (_)=> onDelete(exp),
+                  child: ExpenseItem(expense:exp, onDelete: onDelete),
+                  );
               },
             ),
     );

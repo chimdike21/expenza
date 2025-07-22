@@ -12,6 +12,22 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final List<Expense> _expenses = [];
+  void _deleteExpense(Expense expense) {
+    setState(() {
+      _expenses.remove(expense);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Expense ${expense.title} deleted.',
+        style: TextStyle(fontFamily: 'Nunito', fontSize: 16)),
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.redAccent,
+      ),
+    );
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     MaterialPageRoute(
                       builder: (context) => ExpenseList(
                         expenses: _expenses,
+                        onDelete: _deleteExpense,
                       ), // Replace with real list later
                     ),
                   );

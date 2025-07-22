@@ -4,8 +4,13 @@ import '../models/expense.dart';
 
 class ExpenseItem extends StatelessWidget {
   final Expense expense;
+  final void Function(Expense) onDelete;
 
-  const ExpenseItem({super.key, required this.expense});
+  const ExpenseItem({
+    super.key, 
+    required this.expense,
+    required this.onDelete
+  });
 
   @override
   Widget build(BuildContext context) {
