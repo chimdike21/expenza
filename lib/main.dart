@@ -6,8 +6,8 @@ import 'models/expense.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
-  Hive.registerAdapter(ExpenseAdapter());
-  await Hive.openBox<Expense>('expenses');
+    Hive.registerAdapter(ExpenseAdapter());
+  
   runApp(
     const ExpenzaApp(),
   );
@@ -26,8 +26,20 @@ class ExpenzaApp extends StatelessWidget {
         //visualDensity: VisualDensity.adaptivePlatformDensity,
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      
       debugShowCheckedModeBanner: false,
+            home: FutureBuilder(
+        future: Hive.openBox<Expense>('expenses'),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return const HomeScreen();
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
     );
     
   }
