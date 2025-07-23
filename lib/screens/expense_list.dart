@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 //import 'package:intl/intl.dart';
 import '../models/expense.dart';
 
-class ExpenseList extends StatelessWidget {
+class ExpenseList extends StatefulWidget {
   final List<Expense> expenses;
   final void Function(Expense) onDelete;
 
@@ -14,12 +14,17 @@ class ExpenseList extends StatelessWidget {
   });
 
   @override
+  State<ExpenseList> createState() => _ExpenseListState();
+}
+
+class _ExpenseListState extends State<ExpenseList> {
+  @override
   Widget build(BuildContext context) {
-    final totalAmount = expenses.fold(0.0, (sum, e) => sum + e.amount);
-    final expenseCount = expenses.length;
+    final totalAmount = widget.expenses.fold(0.0, (sum, e) => sum + e.amount);
+    final expenseCount = widget.expenses.length;
     return Scaffold(
       appBar: AppBar(title: const Text('Your Expenses')),
-      body: expenses.isEmpty
+      body: widget.expenses.isEmpty
           ? const Center(
               child: Text(
                 'No expenses found. Start adding some!',
@@ -67,9 +72,9 @@ class ExpenseList extends StatelessWidget {
                 ),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: expenses.length,
+                    itemCount: widget.expenses.length,
                     itemBuilder: (context, index) {
-                      final expense = expenses[index];
+                      final expense = widget.expenses[index];
                       return Dismissible(
                         key: ValueKey(expense.id),
                         background: Container(
@@ -80,11 +85,11 @@ class ExpenseList extends StatelessWidget {
                         ),
                         direction: DismissDirection.endToStart,
                         onDismissed: (_) {
-                          onDelete(expense);
+                          widget.onDelete(expense);
                         },
                         child: ExpenseItem(
                           expense: expense,
-                          onDelete: onDelete,
+                          onDelete: widget.onDelete,
                         ),
                       );
                     },
