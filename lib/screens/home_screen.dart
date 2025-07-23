@@ -2,6 +2,7 @@ import 'package:expenza/models/expense.dart';
 import 'package:expenza/widgets/expense_form.dart';
 import 'package:flutter/material.dart';
 import 'package:expenza/screens/expense_list.dart';
+import 'package:hive/hive.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,23 +12,30 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<Expense> _expenses = [];
-  void _deleteExpense(Expense expense) {
-    setState(() {
-      _expenses.remove(expense);
-    });
+  late Box<Expense> expenseBox;
+
+  void initState() {
+    super.initState();
+    expenseBox = Hive.box<Expense>('expenses');
+  }
+
+  void _deleteExpense(MapEntry<dynamic, Expense> entry) {
+    final key = entry.key;
+    final expense = entry.value;
+    expenseBox.delete(key);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Expense ${expense.title} deleted.',
-        style: TextStyle(fontFamily: 'Nunito', fontSize: 16)),
+        content: Text(
+          'Expense ${expense.title} deleted.',
+          style: TextStyle(fontFamily: 'Nunito', fontSize: 16),
+        ),
         duration: const Duration(seconds: 2),
         backgroundColor: Colors.redAccent,
       ),
     );
+    setState(() {});
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => ExpenseList(
-                        expenses: _expenses,
+                        expenses: expenseBox.toMap().entries.toList(),
                         onDelete: _deleteExpense,
                       ), // Replace with real list later
                     ),
@@ -131,10 +139,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     MaterialPageRoute(
                       builder: (context) => ExpenseForm(
                         onSubmit: (expense) {
-                          setState(() {
-                            _expenses.add(expense);
-                          });
-                         Navigator.pop(context);
+                          expenseBox.add(expense);
+                          setState(() {});
+                          Navigator.pop(context);
                         },
                       ),
                     ),

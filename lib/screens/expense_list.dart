@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import '../models/expense.dart';
 
 class ExpenseList extends StatefulWidget {
-  final List<Expense> expenses;
-  final void Function(Expense) onDelete;
+  final List<MapEntry<dynamic, Expense>> expenses;
+  final void Function(MapEntry<dynamic, Expense>) onDelete;
 
   const ExpenseList({
     super.key,
     required this.expenses,
     required this.onDelete,
-  });
+  }); 
 
   @override
   State<ExpenseList> createState() => _ExpenseListState();
@@ -20,7 +20,7 @@ class ExpenseList extends StatefulWidget {
 class _ExpenseListState extends State<ExpenseList> {
   @override
   Widget build(BuildContext context) {
-    final totalAmount = widget.expenses.fold(0.0, (sum, e) => sum + e.amount);
+    final totalAmount = widget.expenses.fold(0.0, (sum, e) => sum + e.value.amount);
     final expenseCount = widget.expenses.length;
     return Scaffold(
       appBar: AppBar(title: const Text('Your Expenses')),
@@ -74,7 +74,8 @@ class _ExpenseListState extends State<ExpenseList> {
                   child: ListView.builder(
                     itemCount: widget.expenses.length,
                     itemBuilder: (context, index) {
-                      final expense = widget.expenses[index];
+                      final entry = widget.expenses[index];
+                      final expense = entry.value;
                       return Dismissible(
                         key: ValueKey(expense.id),
                         background: Container(
@@ -85,11 +86,11 @@ class _ExpenseListState extends State<ExpenseList> {
                         ),
                         direction: DismissDirection.endToStart,
                         onDismissed: (_) {
-                          widget.onDelete(expense);
+                          widget.onDelete(entry);
                         },
                         child: ExpenseItem(
                           expense: expense,
-                          onDelete: widget.onDelete,
+                          onDelete: (_) => widget.onDelete(entry),
                         ),
                       );
                     },
