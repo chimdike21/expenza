@@ -5,24 +5,26 @@ part 'expense.g.dart';
 const uuid = Uuid();
 
 @HiveType(typeId: 0)
-class Expense {
+class Expense extends HiveObject {
   @HiveField(0)
   final String id;
   
   @HiveField(1)
-  final String title;
+  String title;
+
   @HiveField(2)
-  final double amount;
+  double amount;
+
   @HiveField(3)
-  final DateTime date;
+  DateTime date;
+
   @HiveField(4)
-  final String category;
+  String category;
 
   Expense({
     required this.title,
     required this.amount,
     required this.date,
     required this.category,
-    
   }) : id = uuid.v4();
 }

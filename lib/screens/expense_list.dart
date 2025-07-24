@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../models/expense.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:expenza/widgets/expense_form.dart';
 
 class ExpenseList extends StatefulWidget {
   final List<MapEntry<dynamic, Expense>> expenses;
@@ -104,6 +105,14 @@ class _ExpenseListState extends State<ExpenseList> {
                       child: ExpenseItem(
                         expense: expense,
                         onDelete: (_) => widget.onDelete(entry),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ExpenseForm(expense: expense, onSubmit: (_) {  },),
+                            ),
+                          );
+                        },
                       ),
                     );
                   },

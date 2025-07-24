@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/expense.dart';
 
+
 class ExpenseForm extends StatefulWidget {
   final void Function(Expense expense) onSubmit;
+  final Expense? expense;
 
-  const ExpenseForm({super.key, required this.onSubmit});
+  const ExpenseForm({super.key, required this.onSubmit, this.expense});
 
   @override
   _ExpenseFormState createState() => _ExpenseFormState();
@@ -17,6 +19,18 @@ class _ExpenseFormState extends State<ExpenseForm> {
 
   String? selectedCategory;
   DateTime? selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    final exp = widget.expense;
+    if (exp != null) {
+      titleController.text = exp.title;
+      amountController.text = exp.amount.toString();
+      selectedCategory = exp.category;
+      selectedDate = exp.date;
+    }
+  }
 
   void _presentDatepicker() async {
     final now = DateTime.now();
@@ -43,7 +57,7 @@ class _ExpenseFormState extends State<ExpenseForm> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add New Expense')),
+      appBar: AppBar(title:  Text(widget.expense != null ? 'Update Expense' : 'Add New Expense')),
       body: Padding(
         padding: EdgeInsets.only(
           left: 16,
@@ -55,8 +69,8 @@ class _ExpenseFormState extends State<ExpenseForm> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Add New Expense',
+            Text(
+              widget.expense != null ? 'Update Expense' : 'Add New Expense',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -143,15 +157,26 @@ class _ExpenseFormState extends State<ExpenseForm> {
                   print('Category: $selectedCategory');
                   print('Date: ${DateFormat.yMMMd().format(selectedDate!)}');
 
-                  widget.onSubmit(
-                    Expense(
-                      title: enteredTitle,
-                      amount: enteredAmount,
-                      category: selectedCategory!,
-                      date: selectedDate!,
-                    ),
-                  );
-                 
+                  if (widget.expense != null) {
+                    // Update existing expense
+                    widget.expense!
+                      ..title = enteredTitle
+                      ..amount = enteredAmount
+                      ..category = selectedCategory!
+                      ..date = selectedDate!;
+                    widget.expense!.save();
+                  } else {
+                    //add new expense
+                    widget.onSubmit(
+                      Expense(
+                        title: enteredTitle,
+                        amount: enteredAmount,
+                        category: selectedCategory!,
+                        date: selectedDate!,
+                      ),
+                    );
+                  }
+
                   showDialog(
                     context: context,
                     builder: (context) {
@@ -161,11 +186,15 @@ class _ExpenseFormState extends State<ExpenseForm> {
                         ),
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(Icons.check_circle, color: Colors.green, size: 60),
-                            SizedBox(height: 12),
+                          children: [
+                            const Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                              size: 60,
+                            ),
+                            const SizedBox(height: 12),
                             Text(
-                              'Expense added!',
+                            widget.expense != null ? 'Expense Updated!' : 'Expense Added!',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
@@ -195,8 +224,8 @@ class _ExpenseFormState extends State<ExpenseForm> {
                     vertical: 12,
                   ),
                 ),
-                child: const Text(
-                  'Add Expense',
+                child:  Text(
+                  widget.expense != null ? 'Update Expense' : 'Add Expense',
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
