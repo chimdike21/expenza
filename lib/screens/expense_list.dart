@@ -21,6 +21,27 @@ class ExpenseList extends StatefulWidget {
 }
 
 class _ExpenseListState extends State<ExpenseList> {
+  String selectedRange = '1M';
+
+  String _getRangeLabel() {
+    final now = DateTime.now();
+
+    switch (selectedRange) {
+      case '1D':
+        return 'the last day';
+      case '1W':
+        return 'the last week';
+      case '1M':
+        return '${now.month}-${now.year}';
+      case '3M':
+        return 'the last 3 months';
+      case '1Y':
+        return 'the year ${now.year}';
+      default:
+       return '${now.month}-${now.year}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,29 +78,73 @@ class _ExpenseListState extends State<ExpenseList> {
                   vertical: 16,
                   horizontal: 20,
                 ),
-                color: Colors.green[50],
+                color: Colors.white,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Total Expenses: ₦${totalAmount.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        color: Colors.green,
+                      '₦${totalAmount.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        color: Colors.black,
                         fontFamily: 'Nunito',
-                        fontSize: 20,
+                        fontSize: 28,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     Text(
-                      'You have made $expenseCount expenses',
-                      style: TextStyle(
-                        color: Colors.black87,
+                      'Spent in ${_getRangeLabel()}',
+                      style: const TextStyle(
+                        color: Colors.black54,
                         fontFamily: 'Nunito',
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    //pie placeholder
+                    Center(
+                      child: Container(
+                        height: 160,
+                        width: 160,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'Pie Chart',
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontFamily: 'Nunito',
+                            ),
+                          ),
+                        ),
+                        
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: ['1D', '1W', '1M', '3M', '1Y'].map((range) {
+                        return ChoiceChip(
+                          label: Text(range,
+                          style: TextStyle(
+                            color: selectedRange == range ? Colors.white : Colors.black,
+                            fontFamily: 'Nunito',
+                            fontWeight: FontWeight.w600,
+                          )),
+                          selectedColor: Colors.green,
+                          backgroundColor: Colors.grey[200],
+                          selected: selectedRange == range,
+                          onSelected: (_){
+                            setState(() {
+                              selectedRange = range;
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -109,7 +174,10 @@ class _ExpenseListState extends State<ExpenseList> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => ExpenseForm(expense: expense, onSubmit: (_) {  },),
+                              builder: (_) => ExpenseForm(
+                                expense: expense,
+                                onSubmit: (_) {},
+                              ),
                             ),
                           );
                         },
